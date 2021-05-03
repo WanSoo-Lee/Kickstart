@@ -70,4 +70,32 @@ kexec-tools
 %end
 
 %anaconda
-pwpolicy root --min
+pwpolicy root --minquality=1 --notstrict --nochanges --notempty
+pwpolicy user --minquality=1 --notstrict --nochanges --emptyok
+pwpolicy luks --minquality=1 --notstrict --nochanges --notempty
+%end
+
+%post --nochroot
+#!/bin/sh
+
+set -x -v
+
+# Update at/cron access
+rm -f /etc/at.deny
+rm -f /etc/cron.deny
+touch /etc/at.allow
+touch /etc/cron.allow
+
+# Update file permissions
+chmod 600 /etc/passwd-
+chmod 600 /etc/group-
+chmod og-rwx /etc/cron.d
+
+# Cleanup
+rm -rf /tmp/*
+
+yum update -y
+yum clean all
+
+echo "john  ALL(=ALL) NOPASSWD: ALL" >> /etc/sudoers.d/john
+%end
