@@ -1,2 +1,73 @@
 https://access.redhat.com/documentation/ko-kr/red_hat_enterprise_linux/7/html/installation_guide/sect-kickstart-syntax
 
+# CentOS 로 부팅 후 install, live cd 메뉴에서 [tab]을 눌러 아래의 줄을 추가 시킨다(floppy의 kickstart 파일을 읽을 수 있게
+linux inst.ks=hd:/dev/fd0:/ks.cfg
+
+
+## kst.cfg
+# version=DEVEL
+# System authorization information
+auth --enableshadow --passalgo=sha512
+# Use test install
+text
+## Use graphical install
+# graphical
+# Use CDROM installation media
+cdrom
+# Run the Setup Agent on first boot
+firstboot --enable
+ignoredisk --only-use=sda
+# Keyboard layouts
+keyboard --vckeymap=kr --xlayouts='kr'
+# system language
+lang ko_KR.UTF-8
+# Reboot after installation
+reboot
+# SELinux configuration
+selinux --permissive
+# Firewall configuration
+firewall --disabled
+
+# Network information
+network --bootproto=dhcp --device=ens33 --ipv6=auto --no-activate
+network --hostname=localhost.localdomain
+
+# Root password
+rootpw --iscrypted []
+# System services
+services --enabled="chronyd"
+# System timezone
+timezone Asia/Seoul --isUtc
+# User add
+user --groups=wheel --name=john --passwd=[]
+## X Window System configuration information
+# xconfig --startxonboot
+# System bootloader configuration
+bootloader --apped=" crashkernel=auto" --location=mbr --boot-drive=sda
+autoport --type=lvm
+# Partition clearing informaion
+# clearpart --none --initlabel
+clearpart --all --initlabel --drives=sda
+
+eula --agreed
+
+%packages
+@^minimal
+@base
+@core
+@fonts
+@guest-agents
+@hardware-monitoring
+@input-methods
+@multimedia
+chrony
+kexec-tools
+
+%end
+
+%addon com_redhat_kdump --enable --reserve-mb='auto'
+
+%end
+
+%anaconda
+pwpolicy root --min
